@@ -1,0 +1,117 @@
+/* أنماط مخصصة للنظام المحاسبي */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.sidebar {
+    transition: all 0.3s ease;
+}
+
+.sidebar.collapsed {
+    width: 70px;
+}
+
+.sidebar.collapsed .sidebar-text {
+    display: none;
+}
+
+.main-content {
+    transition: all 0.3s ease;
+}
+
+.stat-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.login-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+.input-group {
+    transition: all 0.3s ease;
+}
+
+.input-group:focus-within {
+    transform: translateY(-2px);
+}
+
+/* تصميم متجاوب للشريط الجانبي */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        height: 100vh;
+        z-index: 1000;
+        transform: translateX(-100%);
+    }
+    
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+}
+
+/* تخصيص Tailwind */
+@layer utilities {
+    .font-arabic {
+        font-family: 'Segoe UI', Tahoma, 'Arial', sans-serif;
+    }
+}
+
+/* تخصيص شريط التمرير */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+.sidebar {
+    transition: transform 0.3s ease;
+}
+
+.sidebar.mobile-open {
+    transform: translateX(0);
+}
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        right: -250px; /* بدلاً من translateX(-100%) */
+        height: 100vh;
+        width: 250px;
+        z-index: 1000;
+        transition: right 0.3s ease;
+    }
+    
+    .sidebar.mobile-open {
+        right: 0; /* يظهر عند فتحه */
+    }
+}
+
+.main-content {
+    transition: margin-right 0.3s ease;
+}
+@media (max-width: 768px) {
+    .main-content {
+        margin-right: 0;
+        transition: margin-right 0.3s ease;
+    }
+
+    .sidebar.mobile-open ~ .main-content {
+        margin-right: 250px; /* نفس عرض sidebar */
+    }
+}

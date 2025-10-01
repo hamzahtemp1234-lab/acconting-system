@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم المحاسبية - النظام المتكامل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #05205a;
+            --secondary-color: #f5af22;
+        }
+        .bg-primary { background-color: var(--primary-color); }
+        .text-primary { color: var(--primary-color); }
+        .bg-secondary { background-color: var(--secondary-color); }
+        .text-secondary { color: var(--secondary-color); }
+        
+        body { 
+            font-family: 'Arial', sans-serif; 
+            overflow-x: hidden;
+        }
+        
+        /* تحسينات للشاشات الصغيرة - التصحيح الأساسي هنا */
+        @media (max-width: 768px) {
+            #sidebar {
+                position: fixed;
+                height: 100vh;
+                z-index: 1000;
+                transform: translateX(100%); /* القائمة تبدأ خارج الشاشة من اليمين */
+                transition: transform 0.3s ease;
+                right: 0; /* تثبيت القائمة على اليمين */
+                top: 0;
+                width: 280px;
+            }
+            
+            #sidebar.active {
+                transform: translateX(0); /* عند التفعيل، تظهر القائمة */
+            }
+            
+            #sidebar-toggle {
+                display: block;
+            }
+            
+            main {
+                width: 100%;
+                padding: 1rem;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            header h1 {
+                font-size: 1.5rem;
+                text-align: center;
+                width: 100%;
+            }
+            
+            /* تحسينات رئيسية للأزرار */
+            .header-buttons {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                gap: 0.5rem;
+            }
+            
+            .header-buttons button {
+                width: 100%;
+                margin: 0;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            /* إزالة المساحة الفارغة على اليسار */
+            body {
+                padding: 0;
+            }
+            
+            main {
+                padding: 0.5rem;
+            }
+            
+            /* تحسينات إضافية للشاشات الصغيرة جداً */
+            @media (max-width: 480px) {
+                main {
+                    padding: 0.25rem;
+                }
+                
+                header h1 {
+                    font-size: 1.3rem;
+                }
+                
+                .header-buttons button {
+                    padding: 0.75rem 0.5rem;
+                    font-size: 0.9rem;
+                }
+            }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            #sidebar {
+                position: relative;
+                transform: translateX(0);
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-buttons {
+                display: flex;
+                flex-direction: row;
+                gap: 1rem;
+            }
+        }
+        
+        @media (min-width: 1025px) {
+            #sidebar {
+                position: relative;
+                transform: translateX(0);
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .main-grid {
+                grid-template-columns: 2fr 1fr;
+            }
+            
+            .header-buttons {
+                display: flex;
+                flex-direction: row;
+                gap: 1rem;
+            }
+        }
+        
+        /* زر القائمة للشاشات الصغيرة - تم التصحيح */
+        #sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            right: 1rem; /* زر القائمة في الجانب الأيمن */
+            z-index: 1100;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        /* طبقة التعتيم للشاشات الصغيرة - تم التصحيح */
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        
+        #overlay.active {
+            display: block;
+        }
+        
+        /* تنسيقات عامة للقائمة */
+        #sidebar {
+            width: 280px;
+        }
+        
+        /* زر إغلاق القائمة */
+        #close-sidebar {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            #close-sidebar {
+                display: block;
+            }
+        }
+        
+        /* تحسينات إضافية للتصميم العربي */
+        .table-header {
+            text-align: right;
+        }
+        
+        .table-cell {
+            text-align: right;
+        }
+        
+        /* تحسينات للأزرار */
+        .header-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .header-buttons button {
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+        
+        .header-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 flex h-screen">
+
+    <!-- زر القائمة للشاشات الصغيرة - في الجانب الأيمن -->
+    <button id="sidebar-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- طبقة التعتيم للشاشات الصغيرة -->
+    <div id="overlay"></div>
+
+    <aside id="sidebar" class="bg-primary text-white p-4 flex flex-col transition-all duration-300">
+        <div class="flex justify-between items-center mb-8 text-secondary border-b border-secondary/50 pb-4">
+            <div class="text-2xl font-bold">نظام المحاسبة</div>
+            <button id="close-sidebar" class="text-white text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="space-y-2 flex-grow">
+            <a href="#" class="flex items-center p-3 rounded-lg bg-secondary/20 font-bold hover:bg-secondary/40 transition">
+                <i class="fas fa-tachometer-alt ml-3"></i> لوحة التحكم
+            </a>
+            
+            <div class="pt-4 border-t border-white/20">
+                <p class="text-xs text-white/50 uppercase mb-2">العمليات</p>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">سندات القبض</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">سندات الصرف</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">قيود اليومية</a>
+            </div>
+
+            <div class="pt-4 border-t border-white/20">
+                <p class="text-xs text-white/50 uppercase mb-2">التقارير المالية</p>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">ميزانية المراجعة</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">الأستاذ العام</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">الميزانية العمومية</a>
+            </div>
+
+            <div class="pt-4 border-t border-white/20">
+                <p class="text-xs text-white/50 uppercase mb-2">التهيئات</p>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">شجرة الحسابات</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">العملاء والموردين</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">العملات والبنوك</a>
+            </div>
+        </nav>
+        
+        <div class="mt-auto border-t border-white/20 pt-4">
+            <div class="flex items-center p-2 hover:bg-white/10 rounded-lg cursor-pointer">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiNGRkYiLz4KPHBhdGggZD0iTTE2IDE3QzE4LjIwOTEgMTcgMjAgMTUuMjA5MSAyMCAxM0MyMCAxMC43OTA5IDE4LjIwOTEgOSAxNiA5QzEzLjc5MDkgOSAxMiAxMC43OTA5IDEyIDEzQzEyIDE1LjIwOTEgMTMuNzkwOSAxNyAxNiAxN1oiIGZpbGw9IiMwNTIwNUEiLz4KPHBhdGggZD0iTTE2IDE4QzEyLjY4NjMgMTggMTAgMjAuNjg2MyAxMCAyNEgyMkMyMiAyMC42ODYzIDE5LjMxMzcgMTggMTYgMThaIiBmaWxsPSIjMDUyMDVBIi8+Cjwvc3ZnPgo=" alt="User" class="w-8 h-8 rounded-full bg-white ml-2">
+                <span class="text-sm">المحاسب علي</span>
+            </div>
+            <a href="#" class="block text-center mt-2 text-xs text-secondary hover:underline">تسجيل الخروج</a>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-8 overflow-y-auto">
+        
+        <header class="flex justify-between items-center mb-8 pb-4 border-b border-gray-200">
+            <h1 class="text-3xl font-extrabold text-primary">
+                <i class="fas fa-user-plus ml-3 text-secondary"></i> تسجيل مستخدم جديد
+            </h1>
+            <a href="users-list.html" class="px-4 py-2 border border-gray-300 rounded-lg text-primary hover:bg-gray-100 transition font-medium">
+                <i class="fas fa-arrow-right ml-2"></i> العودة للقائمة
+            </a>
+        </header>
+
+        <div class="max-w-4xl mx-auto bg-white p-10 rounded-xl shadow-2xl border-t-4 border-primary">
+            
+            <form id="addUserForm" action="#" method="POST" class="space-y-8">
+                
+                <div class="border-b border-gray-200 pb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-primary border-r-4 border-secondary pr-3">
+                        معلومات تسجيل الدخول 🔑
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني (اسم المستخدم) <span class="text-red-500">*</span></label>
+                            <input id="email" name="email" type="email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-secondary focus:border-secondary transition" placeholder="example@company.com">
+                        </div>
+                        
+                        <div>
+                            <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">الاسم الكامل <span class="text-red-500">*</span></label>
+                            <input id="fullName" name="fullName" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-secondary focus:border-secondary transition" placeholder="أدخل الاسم الرباعي">
+                        </div>
+                        
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">كلمة المرور <span class="text-red-500">*</span></label>
+                            <input id="password" name="password" type="password" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-secondary focus:border-secondary transition" placeholder="******">
+                        </div>
+
+                        <div>
+                            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">تأكيد كلمة المرور <span class="text-red-500">*</span></label>
+                            <input id="confirmPassword" name="confirmPassword" type="password" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-secondary focus:border-secondary transition" placeholder="أعد إدخال كلمة المرور">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-b border-gray-200 pb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-primary border-r-4 border-secondary pr-3">
+                        تحديد الدور والصلاحيات 🛡️
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <div>
+                            <label for="role" class="block text-sm font-medium text-gray-700 mb-1">الدور/المسمى الوظيفي <span class="text-red-500">*</span></label>
+                            <select id="role" name="role" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-secondary focus:border-secondary transition bg-white">
+                                <option value="">-- اختر الدور --</option>
+                                <option value="admin">مدير النظام (صلاحيات كاملة)</option>
+                                <option value="accountant">محاسب رئيسي</option>
+                                <option value="data-entry">مدخل بيانات</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="status" class="block text-sm font-medium text-gray-700 mb-1">حالة المستخدم</label>
+                            <select id="status" name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-secondary focus:border-secondary transition bg-white">
+                                <option value="active">نشط (يمكنه تسجيل الدخول)</option>
+                                <option value="inactive">غير نشط (معلق)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-sm font-semibold text-primary mb-3">صلاحيات النظام المالي المتقدمة:</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm text-gray-800">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="perm_approve" class="h-4 w-4 text-secondary rounded">
+                                <span class="mr-2">اعتماد القيود</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="perm_reports" class="h-4 w-4 text-secondary rounded">
+                                <span class="mr-2">عرض التقارير السرية</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="perm_settings" class="h-4 w-4 text-secondary rounded">
+                                <span class="mr-2">تعديل الإعدادات العامة</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end space-x-4 space-x-reverse">
+                    <button type="button" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition font-medium">
+                        إلغاء
+                    </button>
+                    <button type="submit" class="px-6 py-3 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition font-bold shadow-lg shadow-secondary/30">
+                        <i class="fas fa-save ml-2"></i> حفظ وإضافة المستخدم
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </main>
+    <script>
+        // تهيئة الرسم البياني
+        document.addEventListener('DOMContentLoaded', function() {
+           
+            
+            // التحكم في القائمة الجانبية للشاشات الصغيرة
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const closeSidebar = document.getElementById('close-sidebar');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            // إظهار زر القائمة على الشاشات الصغيرة فقط
+            function checkScreenSize() {
+                if (window.innerWidth < 769) {
+                    sidebarToggle.style.display = 'block';
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                } else {
+                    sidebarToggle.style.display = 'none';
+                    sidebar.classList.add('active');
+                    overlay.classList.remove('active');
+                }
+            }
+            
+            // التحقق من حجم الشاشة عند التحميل وعند تغيير الحجم
+            checkScreenSize();
+            window.addEventListener('resize', checkScreenSize);
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.add('active');
+                    overlay.classList.add('active');
+                });
+            }
+            
+            if (closeSidebar) {
+                closeSidebar.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
+            
+            overlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+            
+            // إغلاق القائمة عند النقر على رابط في القائمة (للشاشات الصغيرة)
+            const sidebarLinks = document.querySelectorAll('#sidebar a');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth < 769) {
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
+

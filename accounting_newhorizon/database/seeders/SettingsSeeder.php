@@ -1,0 +1,29 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use App\Models\Setting;
+
+class SettingsSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        //
+
+
+        Setting::updateOrCreate(
+            ['SettingName' => 'agents.auto_create_child_account'],
+            ['SettingValue' => '1', 'DataType' => 'bool', 'isActive' => true]
+        );
+
+        Setting::updateOrCreate(
+            ['SettingName' => 'agents.parent_account_id'],
+            ['SettingValue' => '123', 'DataType' => 'int', 'isActive' => true] // غيّر 123
+        );
+    }
+}

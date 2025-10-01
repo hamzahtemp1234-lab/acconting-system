@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم المحاسبية - النظام المتكامل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #05205a;
+            --secondary-color: #f5af22;
+        }
+        .bg-primary { background-color: var(--primary-color); }
+        .text-primary { color: var(--primary-color); }
+        .bg-secondary { background-color: var(--secondary-color); }
+        .text-secondary { color: var(--secondary-color); }
+        
+        body { 
+            font-family: 'Arial', sans-serif; 
+            overflow-x: hidden;
+        }
+        
+        /* تحسينات للشاشات الصغيرة - التصحيح الأساسي هنا */
+        @media (max-width: 768px) {
+            #sidebar {
+                position: fixed;
+                height: 100vh;
+                z-index: 1000;
+                transform: translateX(100%); /* القائمة تبدأ خارج الشاشة من اليمين */
+                transition: transform 0.3s ease;
+                right: 0; /* تثبيت القائمة على اليمين */
+                top: 0;
+                width: 280px;
+            }
+            
+            #sidebar.active {
+                transform: translateX(0); /* عند التفعيل، تظهر القائمة */
+            }
+            
+            #sidebar-toggle {
+                display: block;
+            }
+            
+            main {
+                width: 100%;
+                padding: 1rem;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            header h1 {
+                font-size: 1.5rem;
+                text-align: center;
+                width: 100%;
+            }
+            
+            /* تحسينات رئيسية للأزرار */
+            .header-buttons {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                gap: 0.5rem;
+            }
+            
+            .header-buttons button {
+                width: 100%;
+                margin: 0;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            /* إزالة المساحة الفارغة على اليسار */
+            body {
+                padding: 0;
+            }
+            
+            main {
+                padding: 0.5rem;
+            }
+            
+            /* تحسينات إضافية للشاشات الصغيرة جداً */
+            @media (max-width: 480px) {
+                main {
+                    padding: 0.25rem;
+                }
+                
+                header h1 {
+                    font-size: 1.3rem;
+                }
+                
+                .header-buttons button {
+                    padding: 0.75rem 0.5rem;
+                    font-size: 0.9rem;
+                }
+            }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            #sidebar {
+                position: relative;
+                transform: translateX(0);
+                height: 100vh;
+                overflow-y: auto;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-buttons {
+                display: flex;
+                flex-direction: row;
+                gap: 1rem;
+            }
+        }
+        
+        @media (min-width: 1025px) {
+            #sidebar {
+                position: relative;
+                transform: translateX(0);
+                height: 100vh;
+                overflow-y: auto;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .main-grid {
+                grid-template-columns: 2fr 1fr;
+            }
+            
+            .header-buttons {
+                display: flex;
+                flex-direction: row;
+                gap: 1rem;
+            }
+        }
+        
+        /* زر القائمة للشاشات الصغيرة - تم التصحيح */
+        #sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            right: 1rem; /* زر القائمة في الجانب الأيمن */
+            z-index: 1100;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        /* طبقة التعتيم للشاشات الصغيرة - تم التصحيح */
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        
+        #overlay.active {
+            display: block;
+        }
+        
+        /* تنسيقات عامة للقائمة - التصحيح هنا */
+        #sidebar {
+            width: 280px;
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* زر إغلاق القائمة */
+        #close-sidebar {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            #close-sidebar {
+                display: block;
+            }
+        }
+        
+        /* تحسينات إضافية للتصميم العربي */
+        .table-header {
+            text-align: right;
+        }
+        
+        .table-cell {
+            text-align: right;
+        }
+        
+        /* تحسينات للأزرار */
+        .header-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .header-buttons button {
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+        
+        .header-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* تحسينات للقائمة الجانبية */
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 1rem;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 1rem;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 flex h-screen">
+
+    <!-- زر القائمة للشاشات الصغيرة - في الجانب الأيمن -->
+    <button id="sidebar-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- طبقة التعتيم للشاشات الصغيرة -->
+    <div id="overlay"></div>
+
+    <aside id="sidebar" class="bg-primary text-white p-4 flex flex-col transition-all duration-300">
+        <div class="flex justify-between items-center mb-4 text-secondary border-b border-secondary/50 pb-4">
+            <div class="text-2xl font-bold">نظام المحاسبة</div>
+            <button id="close-sidebar" class="text-white text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- محتوى القائمة مع scroll -->
+        <div class="sidebar-content overflow-y-auto">
+            <!-- العمليات -->
+            <div class="pt-4 border-t border-white/20">
+                <p class="text-xs text-white/50 uppercase mb-2">العمليات</p>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">سندات القبض</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">سندات الصرف</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">قيود اليومية</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">الفواتير</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">المشتريات والمبيعات</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">إدارة المخزون</a>
+            </div>
+
+            <!-- التقارير المالية -->
+            <div class="pt-4 border-t border-white/20">
+                <p class="text-xs text-white/50 uppercase mb-2">التقارير المالية</p>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">ميزانية المراجعة</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">الأستاذ العام</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">الميزانية العمومية</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">كشف حساب العملاء</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">كشف حساب الموردين</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">تقرير الأرباح والخسائر</a>
+            </div>
+
+            <!-- التهيئات -->
+            <div class="pt-4 border-t border-white/20">
+                <p class="text-xs text-white/50 uppercase mb-2">التهيئات</p>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">شجرة الحسابات</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">العملاء والموردين</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">العملات والبنوك</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">الضرائب والرسوم</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">أنواع المصروفات والإيرادات</a>
+            </div>
+
+            <!-- إدارة النظام والصلاحيات -->
+            <div class="pt-4 border-t border-white/20">
+                <p class="text-xs text-white/50 uppercase mb-2">إدارة النظام والصلاحيات</p>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">المستخدمين</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">الأدوار</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">الأذونات</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">سجل النشاطات (Logs)</a>
+                <a href="#" class="block p-2 rounded-lg hover:bg-white/10 transition">مسارات التدقيق (Audit Trails)</a>
+            </div>
+        </div>
+
+        <!-- تذييل القائمة -->
+        <div class="sidebar-footer border-t border-white/20 pt-4">
+            <div class="flex items-center p-2 hover:bg-white/10 rounded-lg cursor-pointer mb-2">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiNGRkYiLz4KPHBhdGggZD0iTTE2IDE3QzE4LjIwOTEgMTcgMjAgMTUuMjA5MSAyMCAxM0MyMCAxMC43OTA5IDE4LjIwOTEgOSAxNiA5QzEzLjc5MDkgOSAxMiAxMC43OTA5IDEyIDEzQzEyIDE1LjIwOTEgMTMuNzkwOSAxNyAxNiAxN1oiIGZpbGw9IiMwNTIwNUEiLz4KPHBhdGggZD0iTTE2IDE4QzEyLjY4NjMgMTggMTAgMjAuNjg2MyAxMCAyNEgyMkMyMiAyMC42ODYzIDE5LjMxMzcgMTggMTYgMThaIiBmaWxsPSIjMDUyMDVBIi8+Cjwvc3ZnPgo=" alt="User" class="w-8 h-8 rounded-full bg-white ml-2">
+                <span class="text-sm">المحاسب علي</span>
+            </div>
+            <a href="#" class="block text-center text-xs text-secondary hover:underline">تسجيل الخروج</a>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-8 overflow-y-auto">
+        
+        <header class="flex justify-between items-center mb-8 pb-4 border-b border-gray-200">
+            <h1 class="text-3xl font-extrabold text-primary">لوحة التحكم المحاسبية</h1>
+            <div class="space-x-4 space-x-reverse header-buttons">
+                <button class="px-4 py-2 bg-secondary text-primary rounded-lg font-semibold shadow-md hover:bg-secondary/80 transition">
+                    + قيد يومية جديد
+                </button>
+                <button class="px-4 py-2 bg-primary text-white rounded-lg font-semibold shadow-md hover:bg-primary/80 transition">
+                    + سند قبض/صرف
+                </button>
+            </div>
+        </header>
+
+        <section class="stats-grid grid gap-6 mb-10">
+            <div class="bg-white p-6 rounded-xl shadow-lg border-r-4 border-secondary transition duration-300 hover:shadow-xl">
+                <p class="text-sm text-gray-500">الرصيد النقدي الفوري</p>
+                <p class="text-3xl font-bold text-primary mt-1">250,500 <span class="text-secondary text-xl">ريال</span></p>
+                <p class="text-xs text-green-500 mt-2">+5% عن الشهر الماضي</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-lg border-r-4 border-primary/50 transition duration-300 hover:shadow-xl">
+                <p class="text-sm text-gray-500">إجمالي الذمم المدينة</p>
+                <p class="text-3xl font-bold text-primary mt-1">112,800 <span class="text-gray-400 text-xl">ريال</span></p>
+                <p class="text-xs text-red-500 mt-2">3 فواتير متأخرة الدفع</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-lg border-r-4 border-primary/50 transition duration-300 hover:shadow-xl">
+                <p class="text-sm text-gray-500">إجمالي الذمم الدائنة</p>
+                <p class="text-3xl font-bold text-primary mt-1">85,200 <span class="text-gray-400 text-xl">ريال</span></p>
+                <p class="text-xs text-green-500 mt-2">المطلوب سداده خلال 7 أيام</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-lg border-r-4 border-secondary transition duration-300 hover:shadow-xl">
+                <p class="text-sm text-gray-500">قيود اليومية غير المعتمدة</p>
+                <p class="text-3xl font-bold text-secondary mt-1">4</p>
+                <p class="text-xs text-gray-500 mt-2">تحتاج مراجعة المدير المالي</p>
+            </div>
+        </section>
+
+        <section class="main-grid grid gap-6">
+            
+            <div class="space-y-6">
+                
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4 text-primary">صافي التدفق النقدي (آخر 6 أشهر)</h3>
+                    <canvas id="cashFlowChart" class="h-80"></canvas>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4 text-primary">آخر القيود المسجلة</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">التاريخ</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الوصف</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المدين</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الدائن</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المصدر</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200 text-sm">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">2025-09-27</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">تحصيل دفعة من العميل (أحمد)</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-red-600">0.00</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-green-600">12,500.00</td>
+                                    <td class="px-6 py-4 whitespace-nowrap"><span class="bg-secondary/20 text-secondary text-xs px-2 py-1 rounded-full">سند قبض</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">2025-09-26</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">سداد فاتورة المورد (الشرق)</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-red-600">8,900.00</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-green-600">0.00</td>
+                                    <td class="px-6 py-4 whitespace-nowrap"><span class="bg-primary/20 text-primary text-xs px-2 py-1 rounded-full">سند صرف</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-primary">
+                    <h3 class="text-xl font-semibold mb-4 text-primary">حالة التقارير</h3>
+                    <ul class="space-y-3">
+                        <li class="flex justify-between items-center text-sm">
+                            <span>ميزانية المراجعة (حتى اليوم)</span>
+                            <a href="#" class="text-secondary hover:underline font-medium">عرض</a>
+                        </li>
+                        <li class="flex justify-between items-center text-sm">
+                            <span>الأستاذ العام</span>
+                            <a href="#" class="text-secondary hover:underline font-medium">عرض</a>
+                        </li>
+                        <li class="flex justify-between items-center text-sm">
+                            <span>العملاء المدينة (أقدم 30 يوماً)</span>
+                            <a href="#" class="text-secondary hover:underline font-medium">تقرير</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-red-50 p-6 rounded-xl shadow-lg border-t-4 border-red-500">
+                    <h3 class="text-xl font-semibold mb-4 text-red-700">تنبيهات هامة</h3>
+                    <p class="text-sm text-red-600 mb-2">**تنبيه:** حساب الصندوق **(1011)** تجاوز الحد الأقصى المسموح به.</p>
+                    <p class="text-sm text-red-600">**مراجعة:** القيود **#201** غير متوازنة (بفارق 500 ريال).</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <script>
+        // تهيئة الرسم البياني
+        document.addEventListener('DOMContentLoaded', function() {
+           
+            
+            // التحكم في القائمة الجانبية للشاشات الصغيرة
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const closeSidebar = document.getElementById('close-sidebar');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            // إظهار زر القائمة على الشاشات الصغيرة فقط
+            function checkScreenSize() {
+                if (window.innerWidth < 769) {
+                    sidebarToggle.style.display = 'block';
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                } else {
+                    sidebarToggle.style.display = 'none';
+                    sidebar.classList.add('active');
+                    overlay.classList.remove('active');
+                }
+            }
+            
+            // التحقق من حجم الشاشة عند التحميل وعند تغيير الحجم
+            checkScreenSize();
+            window.addEventListener('resize', checkScreenSize);
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.add('active');
+                    overlay.classList.add('active');
+                });
+            }
+            
+            if (closeSidebar) {
+                closeSidebar.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
+            
+            overlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+            
+            // إغلاق القائمة عند النقر على رابط في القائمة (للشاشات الصغيرة)
+            const sidebarLinks = document.querySelectorAll('#sidebar a');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth < 769) {
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
